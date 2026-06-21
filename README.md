@@ -15,7 +15,7 @@ bun start
 ```
 
 - **Dashboard**: http://localhost:1930
-- **API key**: `YOUR_API_KEY` (default — see `.env.example`)
+- **API key**: set via `API_KEY` in `.env`
 - **OpenAI**: `http://localhost:1930/v1/chat/completions`
 - **Anthropic**: `http://localhost:1930/v1/messages`
 
