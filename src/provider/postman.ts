@@ -9,7 +9,7 @@ import {
   type StreamChunk,
 } from "./base";
 import type { Account } from "../db/schema";
-import { POSTMAN_PREFIX, POSTMAN_MODELS, resolvePostmanModel } from "./models";
+import { POSTMAN_MODEL_MAP, POSTMAN_MODELS, resolvePostmanModel } from "./models";
 import { PostmanStreamReader, type PostmanDelta } from "./sse-stream";
 import type { PostmanTokens } from "./transcript";
 import { extractTextFromMessage, isAnthropicToolResult } from "./transcript";
@@ -43,7 +43,7 @@ export class PostmanProvider extends BaseProvider {
   supportedModels: ModelInfo[] = POSTMAN_MODELS;
 
   override ownsModel(model: string): boolean {
-    return model.toLowerCase().startsWith(POSTMAN_PREFIX);
+    return model.toLowerCase() in POSTMAN_MODEL_MAP;
   }
 
   private resolveModel(model: string): string | null {

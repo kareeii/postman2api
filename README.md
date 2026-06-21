@@ -38,7 +38,7 @@ Or via dashboard: **Logs** panel → enter credentials → click **Login**.
 curl http://localhost:1930/v1/chat/completions \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"model":"pm/sonnet-4.5","messages":[{"role":"user","content":"Hello!"}],"stream":true}'
+  -d '{"model":"claude-sonnet-4-5","messages":[{"role":"user","content":"Hello!"}],"stream":true}'
 
 # Anthropic
 curl http://localhost:1930/v1/messages \
@@ -49,9 +49,9 @@ curl http://localhost:1930/v1/messages \
 
 ## Models
 
-`pm/opus-4.8`, `pm/opus-4.5`, `pm/sonnet-4.6`, `pm/sonnet-4.5`, `pm/haiku-4.5`, `pm/gpt-5.5`, `pm/gpt-5.4`, `pm/gpt-5.2`, `pm/auto`
+`claude-opus-4-8`, `claude-opus-4-7`, `claude-opus-4-6`, `claude-opus-4-5`, `claude-sonnet-4-6`, `claude-sonnet-4-5`, `claude-haiku-4-5`, `gpt-5.5`, `gpt-5.4`, `gpt-5.2`, `auto`
 
-Antropik alias: `claude-sonnet-4-20250514` → `pm/sonnet-4.5`, `claude-opus-4-20250514` → `pm/opus-4.8`
+Antropik `/v1/messages` accepts official Claude model IDs and normalizes them automatically.
 
 ## Features
 

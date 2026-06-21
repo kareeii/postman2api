@@ -9,24 +9,6 @@ import {
 
 export const chatRouter = new Hono();
 
-const ANTHROPIC_MODEL_ALIASES: Record<string, string> = {
-  "claude-sonnet-4-20250514": "pm/sonnet-4.5",
-  "claude-sonnet-4.5": "pm/sonnet-4.5",
-  "claude-opus-4-20250514": "pm/opus-4.8",
-  "claude-opus-4.8": "pm/opus-4.8",
-  "claude-opus-4.5": "pm/opus-4.5",
-  "claude-haiku-4.5": "pm/haiku-4.5",
-  "claude-3-5-sonnet-20241022": "pm/sonnet-4.5",
-  "claude-3-5-sonnet-latest": "pm/sonnet-4.5",
-  "claude-3-opus-20240229": "pm/opus-4.5",
-  "claude-3-sonnet-20240229": "pm/sonnet-4.5",
-  "claude-3-haiku-20240307": "pm/haiku-4.5",
-  "gpt-5.5": "pm/gpt-5.5",
-  "gpt-5.4": "pm/gpt-5.4",
-  "gpt-5.2": "pm/gpt-5.2",
-  "gpt-5": "pm/gpt-5.2",
-};
-
 chatRouter.post("/v1/chat/completions", async (c) => {
   let body: any;
   try {
@@ -66,9 +48,7 @@ chatRouter.post("/v1/messages", async (c) => {
   }
 
   const originalModel = body.model;
-  body.model = ANTHROPIC_MODEL_ALIASES[body.model] || body.model;
-  if (body.model.startsWith("claude-")) body.model = "pm/sonnet-4.5";
-  if (body.model.startsWith("gpt-") && !body.model.startsWith("pm/")) body.model = "pm/" + body.model;
+  body.model = normalizeModel(body.model);
 
   const openAIRequest = anthropicToOpenAI(body);
   openAIRequest._originalModel = originalModel;
@@ -110,3 +90,23 @@ chatRouter.post("/v1/messages", async (c) => {
     return c.json({ type: "error", error: { type: "api_error", message: errorMessage } }, 500);
   }
 });
+
+function normalizeModel(model: string): string {
+  const m = model.toLowerCase().trim();
+  // Already normalized: claude-opus-4-8 → pass through
+  if (/^(claude|gpt|auto)-/.test(m)) return m;
+  // Anthropic official IDs with dates → strip to base
+  if (m === "claude-sonnet-4-20250514" || m.startsWith("claude-sonnet-4.5")) return "claude-sonnet-4-5";
+  if (m === "claude-opus-4-20250514" || m.startsWith("claude-opus-4.8")) return "claude-opus-4-8";
+  if (m.startsWith("claude-opus-4.7")) return "claude-opus-4-7";
+  if (m.startsWith("claude-opus-4.6")) return "claude-opus-4-6";
+  if (m.startsWith("claude-opus-4.5")) return "claude-opus-4-5";
+  if (m.startsWith("claude-haiku-4.5")) return "claude-haiku-4-5";
+  if (m === "claude-3-5-sonnet-20241022" || m === "claude-3-5-sonnet-latest") return "claude-sonnet-4-5";
+  if (m === "claude-3-opus-20240229") return "claude-opus-4-5";
+  if (m === "claude-3-sonnet-20240229") return "claude-sonnet-4-5";
+  if (m === "claude-3-haiku-20240307") return "claude-haiku-4-5";
+  if (m.startsWith("claude-")) return "claude-sonnet-4-5";
+  if (m.startsWith("gpt-")) return m;
+  return m;
+}
