@@ -1,0 +1,17 @@
+node_modules/
+data/
+.env
+.env.*
+scripts/auth/.venv/
+scripts/auth/__pycache__/
+scripts/auth/app/__pycache__/
+dashboard/dist/
+dashboard/node_modules/
+*.db
+*.db-wal
+*.db-shm
+*.pyc
+.omo/
+__pycache__/
+*.log
+.DS_Store

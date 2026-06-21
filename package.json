@@ -1,0 +1,21 @@
+{
+  "name": "postman2api",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "bun src/index.ts",
+    "dev": "bun --watch src/index.ts",
+    "migrate": "bun src/db/migrate.ts",
+    "build": "cd dashboard && bun run build",
+    "typecheck": "bunx tsc --noEmit"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.2",
+    "hono": "^4.12.17"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "drizzle-kit": "^0.31.10",
+    "typescript": "^5.8.0"
+  }
+}
