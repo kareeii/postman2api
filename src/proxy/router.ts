@@ -32,7 +32,6 @@ export async function routeRequest(
 ): Promise<RouteResult> {
   const maxRetries = 3;
   let lastError = "";
-  const excludedAccountIds = new Set<number>();
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     if (attempt > 0) {
@@ -45,18 +44,9 @@ export async function routeRequest(
       throw new Error("No active accounts available. Add a Postman account first.");
     }
 
-    if (excludedAccountIds.has(account.id)) {
-      lastError = "All available accounts exhausted";
-      continue;
-    }
-
     const startTime = Date.now();
-    let tracked = false;
 
     try {
-      pool.trackRequestStart(account.id);
-      tracked = true;
-
       const result = stream
         ? await provider.chatCompletionStream(account, request)
         : await provider.chatCompletion(account, request);
@@ -69,9 +59,6 @@ export async function routeRequest(
         return { result, account, durationMs };
       }
 
-      pool.trackRequestEnd(account.id);
-      tracked = false;
-
       if (isClientDisconnect(result.error || "")) {
         throw new Error("Client disconnected");
       }
@@ -83,7 +70,6 @@ export async function routeRequest(
 
       if (result.quotaExhausted) {
         await pool.markExhausted(account.id);
-        excludedAccountIds.add(account.id);
         lastError = result.error || "Quota exhausted";
         continue;
       }
@@ -107,10 +93,6 @@ export async function routeRequest(
       lastError = result.error || "Unknown error";
     } catch (error) {
       const errMsg = error instanceof Error ? error.message : String(error);
-      if (tracked) {
-        pool.trackRequestEnd(account.id);
-        tracked = false;
-      }
       if (isClientDisconnect(errMsg)) throw error;
       lastError = errMsg;
     }

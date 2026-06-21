@@ -10,8 +10,6 @@ interface PoolState {
 
 class AccountPool {
   private state: PoolState = { lastIndex: -1 };
-  private inFlightByAccountId = new Map<number, { count: number; startedAt: number }>();
-  private static readonly IN_FLIGHT_STALE_MS = 120_000;
 
   invalidate(): void {
     // No cache in simplified version — always reads from DB
@@ -27,53 +25,9 @@ class AccountPool {
     const allActive = await this.getActiveAccounts();
     if (allActive.length === 0) return null;
 
-    const startIdx = (this.state.lastIndex + 1) % allActive.length;
-    let selected = allActive[startIdx];
-    let selectedIdx = startIdx;
-    let selectedLoad = selected ? this.getInFlightCount(selected.id) : Number.POSITIVE_INFINITY;
-
-    for (let i = 1; i < allActive.length; i++) {
-      const idx = (startIdx + i) % allActive.length;
-      const candidate = allActive[idx];
-      if (!candidate) continue;
-      const load = this.getInFlightCount(candidate.id);
-      if (load < selectedLoad) {
-        selected = candidate;
-        selectedIdx = idx;
-        selectedLoad = load;
-        if (load === 0) break;
-      }
-    }
-
-    this.state.lastIndex = selectedIdx;
-    return selected || null;
-  }
-
-  private getInFlightCount(accountId: number): number {
-    const entry = this.inFlightByAccountId.get(accountId);
-    if (!entry) return 0;
-    if (Date.now() - entry.startedAt > AccountPool.IN_FLIGHT_STALE_MS) {
-      this.inFlightByAccountId.delete(accountId);
-      return 0;
-    }
-    return entry.count;
-  }
-
-  trackRequestStart(accountId: number): void {
-    const entry = this.inFlightByAccountId.get(accountId);
-    if (entry) {
-      entry.count++;
-    } else {
-      this.inFlightByAccountId.set(accountId, { count: 1, startedAt: Date.now() });
-    }
-  }
-
-  trackRequestEnd(accountId: number): void {
-    const entry = this.inFlightByAccountId.get(accountId);
-    if (!entry) return;
-    const next = entry.count - 1;
-    if (next > 0) entry.count = next;
-    else this.inFlightByAccountId.delete(accountId);
+    const nextIdx = (this.state.lastIndex + 1) % allActive.length;
+    this.state.lastIndex = nextIdx;
+    return allActive[nextIdx] || null;
   }
 
   async markUsed(accountId: number): Promise<void> {
