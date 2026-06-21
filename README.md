@@ -51,7 +51,6 @@ curl http://localhost:1930/v1/messages \
 
 `claude-opus-4-8`, `claude-opus-4-7`, `claude-opus-4-6`, `claude-opus-4-5`, `claude-sonnet-4-6`, `claude-sonnet-4-5`, `claude-haiku-4-5`, `gpt-5.5`, `gpt-5.4`, `gpt-5.2`, `auto`
 
-Antropik `/v1/messages` accepts official Claude model IDs and normalizes them automatically.
 
 ## Features
 
